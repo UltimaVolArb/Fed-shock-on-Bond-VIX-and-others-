@@ -1,0 +1,39 @@
+
+
+clear
+capture log close
+set logtype text
+log using tyvixshock.txt, replace
+
+
+import fred VXTYN EFFR T10Y2Y VIXCLS DJIA, daterange(2005-01-02 2020-05-15) aggregate(daily)
+
+
+
+tsset daten
+
+tsline VXTYN
+
+rename VXTYN TYVIX
+rename EFFR FED
+rename T10Y2Y Tentwospread
+rename VIXCLS VIX
+
+/*Regression*/
+reg TYVIX FED Tentwospread VIX DJIA
+
+/*
+/*Stability Check*/
+var FED TYVIX Tentwospread VIX DJIA
+varstable, graph
+*/
+/*they are stable*/
+
+/*VAR model begins*/
+var FED TYVIX Tentwospread DJIA VIX, lags(1/4) dfk
+irf create order1, step(10) set(myFedirf,replace)
+irf graph oirf, impulse(FED) response(FED TYVIX Tentwospread DJIA VIX) 
+irf table oirf, impulse(FED) response(FED TYVIX Tentwospread DJIA VIX) 
+
+
+log cl
